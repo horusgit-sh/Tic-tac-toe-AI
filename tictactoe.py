@@ -98,8 +98,7 @@ def utility(board):
         return 0
 
 
-max_score = 1000
-min_score = -1000
+
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
@@ -111,7 +110,7 @@ def minimax(board):
 
 
     if current_player == X:
-        max_eval = min_score
+        max_eval = float('-inf')
         best_move = None
         for action in actions(board):
             new_board = result(board, action)  # Сделать ход
@@ -124,7 +123,7 @@ def minimax(board):
         return best_move
 
     elif current_player == O:
-        min_eval = max_score
+        min_eval = float('inf')
         best_move = None
         for action in actions(board):
             new_board = result(board, action)  # Сделать ход
