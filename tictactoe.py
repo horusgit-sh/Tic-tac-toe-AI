@@ -118,8 +118,6 @@ def minimax(board):
             if eval_value > max_eval:
                 max_eval = eval_value
                 best_move = action
-        if best_move is None:  # Если не найден лучший ход, возвращаем последний возможный ход
-            best_move = actions(board).pop()
         return best_move
 
     elif current_player == O:
@@ -131,8 +129,6 @@ def minimax(board):
             if eval_value < min_eval:
                 min_eval = eval_value
                 best_move = action
-        if best_move is None:  # Если не найден лучший ход, возвращаем последний возможный ход
-            best_move = actions(board).pop()
         return best_move
 
 
