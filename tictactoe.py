@@ -25,22 +25,16 @@ def player(board):
 
     if x_count > o_count:
         return O
-    elif o_count > x_count:
-        return X
-    elif o_count == x_count == 0:
-        return X
+    return X
 
 
 def actions(board):
     """
     Return all possible actions
     """
-    empty_cell = set()
-    for i in range(3):
-        for j in range(3):
-            if board[i][j] == EMPTY:
-                empty_cell.add((i, j))
-    return empty_cell
+    return {(i, j) for i in range(3) for j in range(3) if board[i][j] == EMPTY}
+
+
 
 
 def result(board, action):
@@ -48,12 +42,10 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
 
+    new_board = [row[:] for row in board]  # Копируем доску
     i, j = action
-    if board[i][j] is not None:
-        raise ValueError("Invalid action: cell is not empty.")
-
-    board[i][j] = player(board)
-    return board
+    new_board[i][j] = player(board)
+    return new_board
 
 
 
@@ -80,10 +72,8 @@ def terminal(board):
     """
     Return True if no one win
     """
-    empty_count = sum(row.count(EMPTY) for row in board)
-    if winner(board) or empty_count == 0:
-        return True
-    return False
+    return winner(board) is not None or all(cell is not EMPTY for row in board for cell in row)
+
 
 def utility(board):
     """
@@ -99,38 +89,54 @@ def utility(board):
 
 
 
-def minimax(board):
+def minimax(board, depth=10):
     """
-    Returns the optimal action for the current player on the board.
+   Return best move
     """
-    if terminal(board):
-        raise ValueError("Game end!")  # Если игра завершена, мы не можем сделать ход.
+
+    def maximize(board, depth):
+        if terminal(board) or depth == 0:
+            return utility(board), None
+
+        best_move = None
+        best_eval = float('-inf')
+
+        for action in actions(board):
+            new_board = result(board, action)
+            eval_value, _ = minimize(new_board, depth - 1)
+
+            if eval_value > best_eval:
+                best_eval = eval_value
+                best_move = action
+
+        return best_eval, best_move
+
+    def minimize(board, depth):
+
+        if terminal(board) or depth == 0:
+            return utility(board), None
+
+        best_move = None
+        best_eval = float('inf')
+
+        for action in actions(board):
+            new_board = result(board, action)
+            eval_value, _ = maximize(new_board, depth - 1)
+
+            if eval_value < best_eval:
+                best_eval = eval_value
+                best_move = action
+
+        return best_eval, best_move
+
 
     current_player = player(board)
-
-
     if current_player == X:
-        max_eval = float('-inf')
-        best_move = None
-        for action in actions(board):
-            new_board = result(board, action)  # Сделать ход
-            eval_value = utility(new_board)  # Получить оценку для следующего хода
-            if eval_value > max_eval:
-                max_eval = eval_value
-                best_move = action
-        return best_move
-
+        _, best_move = maximize(board, depth)
     elif current_player == O:
-        min_eval = float('inf')
-        best_move = None
-        for action in actions(board):
-            new_board = result(board, action)  # Сделать ход
-            eval_value = utility(new_board)  # Получить оценку для следующего хода
-            if eval_value < min_eval:
-                min_eval = eval_value
-                best_move = action
-        return best_move
+        _, best_move = minimize(board, depth)
 
+    return best_move
 
 
 
